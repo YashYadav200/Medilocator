@@ -1,11 +1,12 @@
 const dotenv = require("dotenv");
-dotenv.config(); // Load env vars immediately
+dotenv.config();
 
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-console.log("JWT_SECRET Loaded:", !!process.env.JWT_SECRET); // Debug Log
+console.log("JWT_SECRET Loaded:", !!process.env.JWT_SECRET);
+console.log("MONGO_URI Loaded:", process.env.MONGO_URI);
 
 const authRoutes = require("./routes/authRoutes");
 const vendorRoutes = require("./routes/vendorRoutes");
@@ -15,7 +16,7 @@ const supportRoutes = require("./routes/supportRoutes");
 
 const app = express();
 
-// Global Request Logger - Place FIRST to catch all traffic
+// Logger
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
   next();
@@ -23,8 +24,6 @@ app.use((req, res, next) => {
 
 app.use(cors());
 app.use(express.json());
-
-
 
 app.get("/", (req, res) => {
   res.send("MediLocator Backend Running");
@@ -36,6 +35,7 @@ app.use("/api/search", searchRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/support", supportRoutes);
 
+// MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
@@ -44,4 +44,4 @@ mongoose
       console.log(`Server running on port ${process.env.PORT}`)
     );
   })
-  .catch((err) => console.log(err));
+  .catch((err) => console.error("MongoDB Error:", err));
